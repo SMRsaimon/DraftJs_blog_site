@@ -9,6 +9,9 @@ import { addPost } from "../actions/postAction";
 import { Row, Col, Form, Input, Button, notification } from 'antd';
 import '../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 
+
+
+
 function Add(props) {
   const dispatch = useDispatch();
   //get notifications from store
@@ -44,6 +47,33 @@ function Add(props) {
     //dispatches addPost action 
     dispatch(addPost(newPost));
   }
+// images hendeling 
+function uploadImageCallBack(file) {
+
+  console.log(file, "file")
+  return new Promise(
+    (resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://api.imgur.com/3/image');
+      xhr.setRequestHeader('Authorization', 'Client-ID ##clientid###');
+      const data = new FormData();
+      data.append('image', file);
+      xhr.send(data);
+      xhr.addEventListener('load', () => {
+        const response = JSON.parse(xhr.responseText);
+        console.log(response)
+        resolve(response);
+      });
+      xhr.addEventListener('error', () => {
+        const error = JSON.parse(xhr.responseText);
+        console.log(error)
+        reject(error);
+      });
+    }
+  );
+
+  
+}
 
   useEffect(() => {
     //if notification in store changed it state
@@ -55,6 +85,9 @@ function Add(props) {
       });
     }
   }, [message])
+
+
+
 
   return (
     <Row justify="center">
@@ -81,6 +114,15 @@ function Add(props) {
               onEditorStateChange={handleEditorChange}
               wrapperClassName="demo-wrapper"
               editorClassName="demo-editor"
+              toolbar={{
+                inline: { inDropdown: true },
+                list: { inDropdown: true },
+                textAlign: { inDropdown: true },
+                link: { inDropdown: true },
+                history: { inDropdown: true },
+                image: { uploadCallback: uploadImageCallBack, alt: { present: true, mandatory: true } },
+              }}
+             
             />
           </Form.Item>
           <div style={{ textAlign: "center" }}>
